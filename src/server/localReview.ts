@@ -15,9 +15,18 @@ function describeGap(label: string, field: ContextField): string | undefined {
   return `${label} is ${state}${field.reason ? `: ${field.reason}` : "."}`;
 }
 
+export function hasIncompleteContext(bundle: CheckpointEvidenceBundle): boolean {
+  return (
+    bundle.prompt.availability !== "available" ||
+    bundle.transcript.availability !== "available" ||
+    bundle.metadataPartial
+  );
+}
+
 export function buildLocalReview(
   bundle: CheckpointEvidenceBundle,
   retrieval?: EvidenceRetrieval,
+  analysisNotice?: string,
 ): ReviewResult {
   const limitations = [
     describeGap("Original prompt", bundle.prompt),
@@ -25,7 +34,7 @@ export function buildLocalReview(
     bundle.metadataPartial ? "Checkpoint metadata is partial." : undefined,
   ].filter((item): item is string => Boolean(item));
 
-  const incomplete = limitations.length > 0;
+  const incomplete = hasIncompleteContext(bundle);
   const externalProjection = createExternalEvidenceProjection(bundle);
   const fileEvidence = bundle.evidence.filter((item) => item.type === "file");
   const intent =
@@ -61,6 +70,18 @@ export function buildLocalReview(
       status: "ready",
       evidenceIds: externalProjection.evidence.map((item) => item.id),
       notice: "Using canonical evidence from the local Checkpoint only.",
+    },
+    analysis: {
+      status: incomplete ? "not-run" : "unavailable",
+      provider: "local",
+      cache: "bypassed",
+      persistence: "not-stored",
+      evidenceIds: [],
+      notice:
+        analysisNotice ??
+        (incomplete
+          ? "Semantic analysis was skipped because Checkpoint context is incomplete."
+          : "AgentRouter semantic analysis is unavailable; showing deterministic local evidence."),
     },
     handoff: {
       originalIntent: intent,

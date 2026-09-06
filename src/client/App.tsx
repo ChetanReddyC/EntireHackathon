@@ -16,13 +16,21 @@ export default function App() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const [selectedCheckpointId, setSelectedCheckpointId] = useState<string>();
   const [reviewState, setReviewState] = useState<ReviewState>({ status: "idle" });
+  const [reviewRequest, setReviewRequest] = useState({ attempt: 0, reanalyze: false });
 
   useEffect(() => {
     const controller = new AbortController();
     setLoadState({ status: "loading" });
 
     loadBootstrap(controller.signal)
-      .then((data) => setLoadState({ status: "ready", data }))
+      .then((data) => {
+        setLoadState({ status: "ready", data });
+        setSelectedCheckpointId((current) =>
+          current && data.checkpoints.some((checkpoint) => checkpoint.id === current)
+            ? current
+            : data.checkpoints[0]?.id,
+        );
+      })
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
           const message = error instanceof Error ? error.message : "Repository context could not be loaded.";
@@ -40,8 +48,8 @@ export default function App() {
     }
 
     const controller = new AbortController();
-    setReviewState({ status: "loading" });
-    loadReview(selectedCheckpointId, controller.signal)
+    setReviewState({ status: "loading", action: reviewRequest.reanalyze ? "reanalyze" : "load" });
+    loadReview(selectedCheckpointId, controller.signal, reviewRequest.reanalyze)
       .then((data) => setReviewState({ status: "ready", data }))
       .catch((error: unknown) => {
         if (!controller.signal.aborted) {
@@ -53,7 +61,16 @@ export default function App() {
       });
 
     return () => controller.abort();
-  }, [selectedCheckpointId]);
+  }, [reviewRequest, selectedCheckpointId]);
+
+  function selectCheckpoint(checkpointId: string) {
+    setSelectedCheckpointId(checkpointId);
+    setReviewRequest((request) => ({ attempt: request.attempt + 1, reanalyze: false }));
+  }
+
+  function requestReview(reanalyze: boolean) {
+    setReviewRequest((request) => ({ attempt: request.attempt + 1, reanalyze }));
+  }
 
   return (
     <div className="app-shell">
@@ -96,9 +113,13 @@ export default function App() {
               checkpoints={loadState.data.checkpoints}
               selectedId={selectedCheckpointId}
               sourceLabel={loadState.data.checkpointSource.label}
-              onSelect={setSelectedCheckpointId}
+              onSelect={selectCheckpoint}
             />
-            <ReviewPane state={reviewState} />
+            <ReviewPane
+              state={reviewState}
+              onRetry={() => requestReview(false)}
+              onReanalyze={() => requestReview(true)}
+            />
           </div>
         )}
       </main>

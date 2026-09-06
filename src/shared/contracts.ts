@@ -88,6 +88,34 @@ export const IntentSignalSchema = z.object({
 
 export type IntentSignal = z.infer<typeof IntentSignalSchema>;
 
+export const SemanticAnalysisSchema = z
+  .object({
+    summary: z.string().min(1),
+    signals: z.array(IntentSignalSchema).max(20),
+  })
+  .superRefine((analysis, context) => {
+    const signalIds = new Set<string>();
+    analysis.signals.forEach((signal, index) => {
+      if (signalIds.has(signal.id)) {
+        context.addIssue({
+          code: "custom",
+          message: "Semantic analysis signal IDs must be unique.",
+          path: ["signals", index, "id"],
+        });
+      }
+      signalIds.add(signal.id);
+      if (signal.status !== "Missing" && signal.evidenceIds.length === 0) {
+        context.addIssue({
+          code: "custom",
+          message: `${signal.status} signals require at least one evidence reference.`,
+          path: ["signals", index, "evidenceIds"],
+        });
+      }
+    });
+  });
+
+export type SemanticAnalysis = z.infer<typeof SemanticAnalysisSchema>;
+
 export const EvidenceRetrievalSchema = z.object({
   source: z.enum(["databricks", "local-fallback"]),
   status: z.enum(["ready", "unavailable"]),
@@ -108,6 +136,14 @@ export const ReviewResultSchema = z
     signals: z.array(IntentSignalSchema),
     evidence: z.array(EvidenceSchema),
     retrieval: EvidenceRetrievalSchema,
+    analysis: z.object({
+      status: z.enum(["complete", "unavailable", "not-run"]),
+      provider: z.enum(["agentrouter", "deepseek", "local"]),
+      cache: z.enum(["hit", "miss", "bypassed"]),
+      persistence: z.enum(["stored", "not-stored", "failed"]),
+      evidenceIds: z.array(z.string().min(1)),
+      notice: z.string().min(1),
+    }),
     handoff: z.object({
       originalIntent: z.string().min(1),
       completedWork: z.string().min(1),
@@ -116,32 +152,126 @@ export const ReviewResultSchema = z
       nextStep: z.string().min(1),
     }),
     privacy: z.object({
-      processing: z.literal("local-only"),
+      processing: z.enum(["local-only", "external-allowlisted"]),
       externalEvidenceCount: z.number().int().nonnegative(),
       sensitiveFieldsExcluded: z.array(z.enum(["prompt", "transcript"])),
     }),
   })
   .superRefine((result, context) => {
-    if (result.contextCompleteness !== "incomplete") {
-      return;
+    const evidenceIds = new Set(result.evidence.map((evidence) => evidence.id));
+    const analysisEvidenceIds = new Set(result.analysis.evidenceIds);
+    result.signals.forEach((signal, signalIndex) => {
+      signal.evidenceIds.forEach((evidenceId, evidenceIndex) => {
+        if (!evidenceIds.has(evidenceId)) {
+          context.addIssue({
+            code: "custom",
+            message: "Signals may reference only canonical evidence returned with the review.",
+            path: ["signals", signalIndex, "evidenceIds", evidenceIndex],
+          });
+        }
+        if (result.analysis.status === "complete" && !analysisEvidenceIds.has(evidenceId)) {
+          context.addIssue({
+            code: "custom",
+            message: "Analyzed signals may reference only evidence supplied to the analysis provider.",
+            path: ["signals", signalIndex, "evidenceIds", evidenceIndex],
+          });
+        }
+      });
+    });
+
+    result.analysis.evidenceIds.forEach((evidenceId, index) => {
+      const evidence = result.evidence.find((item) => item.id === evidenceId);
+      if (
+        !evidence ||
+        evidence.handling !== "shareable" ||
+        evidence.type === "prompt" ||
+        evidence.type === "transcript"
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: "Analysis evidence must resolve to allowlisted non-prompt/non-transcript evidence.",
+          path: ["analysis", "evidenceIds", index],
+        });
+      }
+    });
+
+    if (result.contextCompleteness === "incomplete") {
+      if (result.authority !== "provisional") {
+        context.addIssue({
+          code: "custom",
+          message: "Incomplete context can only produce a provisional result.",
+          path: ["authority"],
+        });
+      }
+      if (result.score !== null) {
+        context.addIssue({
+          code: "custom",
+          message: "Incomplete context cannot produce an Intent Guard score.",
+          path: ["score"],
+        });
+      }
+      if (result.analysis.status === "complete" || result.privacy.processing !== "local-only") {
+        context.addIssue({
+          code: "custom",
+          message: "Incomplete context cannot be presented as externally analyzed.",
+          path: ["analysis", "status"],
+        });
+      }
+      if (result.analysis.evidenceIds.length > 0) {
+        context.addIssue({
+          code: "custom",
+          message: "Incomplete context cannot declare model-visible evidence.",
+          path: ["analysis", "evidenceIds"],
+        });
+      }
     }
-    if (result.authority !== "provisional") {
+
+    if (result.analysis.status === "complete" && result.contextCompleteness !== "complete") {
       context.addIssue({
         code: "custom",
-        message: "Incomplete context can only produce a provisional result.",
-        path: ["authority"],
+        message: "Completed semantic analysis requires complete Checkpoint context.",
+        path: ["analysis", "status"],
       });
     }
-    if (result.score !== null) {
+    if (result.analysis.status === "complete" && result.privacy.processing !== "external-allowlisted") {
       context.addIssue({
         code: "custom",
-        message: "Incomplete context cannot produce an Intent Guard score.",
-        path: ["score"],
+        message: "Semantic analysis must disclose allowlisted external processing.",
+        path: ["privacy", "processing"],
+      });
+    }
+    if (
+      result.analysis.status === "complete" &&
+      result.privacy.externalEvidenceCount !== result.analysis.evidenceIds.length
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "External evidence count must match the validated analysis evidence set.",
+        path: ["privacy", "externalEvidenceCount"],
       });
     }
   });
 
 export type ReviewResult = z.infer<typeof ReviewResultSchema>;
+
+export const PersistedReviewIdentitySchema = z.object({
+  repositoryId: z.string().min(1),
+  checkpointId: z.string().min(1),
+  evidenceHash: z.string().regex(/^[a-f0-9]{64}$/),
+  analysisSchemaVersion: z.string().min(1),
+  analysisPromptVersion: z.string().min(1),
+  providerConfigurationId: z.string().min(1),
+});
+
+export type PersistedReviewIdentity = z.infer<typeof PersistedReviewIdentitySchema>;
+
+export const PersistedReviewRecordSchema = z.object({
+  identity: PersistedReviewIdentitySchema,
+  createdAt: z.string().datetime(),
+  result: ReviewResultSchema,
+});
+
+export type PersistedReviewRecord = z.infer<typeof PersistedReviewRecordSchema>;
 
 export const CheckpointFixtureSchema = z.object({
   label: z.string().min(1),

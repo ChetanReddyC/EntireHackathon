@@ -15,7 +15,7 @@ import {
 } from "../shared/contracts.js";
 import type { AppConfig } from "./config.js";
 
-type CheckpointSource = {
+export type CheckpointSource = {
   kind: "entire-cli" | "fixture";
   label: string;
   listCheckpoints(): Promise<CheckpointSummary[]>;
@@ -196,6 +196,22 @@ class EntireCliCheckpointSource implements CheckpointSource {
           source: "entire-checkpoint",
           checkpointId,
           locator: "session-summary:intent",
+        },
+        handling: "local-only",
+      });
+    }
+    if (transcriptRaw.trim() && !isRedacted(transcriptRaw)) {
+      const content = "Transcript is available to local processing only.";
+      evidence.push({
+        id: stableEvidenceId(checkpointId, "transcript", transcriptRaw),
+        type: "transcript",
+        label: "Checkpoint transcript",
+        content,
+        contentHash: contentHash(transcriptRaw),
+        provenance: {
+          source: "entire-checkpoint",
+          checkpointId,
+          locator: "checkpoint-transcript",
         },
         handling: "local-only",
       });

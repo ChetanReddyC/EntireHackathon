@@ -68,6 +68,166 @@
           "handling": "shareable"
         }
       ]
+    },
+    {
+      "checkpoint": {
+        "id": "01K4COMPLETE7M3N8P2R6T9",
+        "title": "Semantic review pipeline ready",
+        "createdAt": "2026-09-06T05:20:00.000Z",
+        "agent": "codex",
+        "branch": "main",
+        "contextCompleteness": "complete"
+      },
+      "prompt": {
+        "availability": "available",
+        "value": "Add a privacy-safe semantic review for Checkpoint evidence."
+      },
+      "transcript": {
+        "availability": "available",
+        "value": "An authorized transcript summary is available locally."
+      },
+      "metadataPartial": false,
+      "outcome": "The review orchestrator, deterministic scoring, and local cache were implemented.",
+      "openItems": [
+        "Confirm that the configured semantic provider has access and available API credit."
+      ],
+      "friction": [],
+      "evidence": [
+        {
+          "id": "01K4COMPLETE7M3N8P2R6T9:file:orchestrator",
+          "type": "file",
+          "label": "src/server/reviewOrchestrator.ts",
+          "content": "Changed file recorded by Entire: src/server/reviewOrchestrator.ts",
+          "contentHash": "fd821a11394d1b7f1867ebc5c0d2f665152b68fa2377e2a06f27f8920463164b",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4COMPLETE7M3N8P2R6T9",
+            "locator": "file:src/server/reviewOrchestrator.ts"
+          },
+          "handling": "shareable"
+        },
+        {
+          "id": "01K4COMPLETE7M3N8P2R6T9:test:focused",
+          "type": "test",
+          "label": "Focused review verification",
+          "content": "Focused verification passed for review orchestration and deterministic scoring.",
+          "contentHash": "f8d4147ce7e85beb952f95fb89decd9994bd6f8b59695c786a30d7e4f4a8f788",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4COMPLETE7M3N8P2R6T9",
+            "locator": "test:review-orchestration"
+          },
+          "handling": "shareable"
+        }
+      ]
+    },
+    {
+      "checkpoint": {
+        "id": "01K4PROMPTHIDDEN4V8B2N6Q",
+        "title": "Prompt hidden by repository policy",
+        "createdAt": "2026-09-06T04:45:00.000Z",
+        "agent": "codex",
+        "branch": "privacy-review",
+        "contextCompleteness": "incomplete"
+      },
+      "prompt": {
+        "availability": "redacted",
+        "reason": "Repository policy removed the original prompt."
+      },
+      "transcript": {
+        "availability": "available",
+        "value": "An authorized transcript summary is available locally."
+      },
+      "metadataPartial": false,
+      "outcome": "The external evidence projection was hardened against sensitive field exposure.",
+      "openItems": [
+        "Obtain authorized intent context before evaluating implementation alignment."
+      ],
+      "friction": [
+        "The original request cannot be reconstructed from available context."
+      ],
+      "evidence": [
+        {
+          "id": "01K4PROMPTHIDDEN4V8B2N6Q:file:privacy",
+          "type": "file",
+          "label": "src/server/privacy.ts",
+          "content": "Changed file recorded by Entire: src/server/privacy.ts",
+          "contentHash": "35111699799f51856e64eb7a72e6b82ed85d7d529b9e0b3fa2cddd59b0d457c7",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4PROMPTHIDDEN4V8B2N6Q",
+            "locator": "file:src/server/privacy.ts"
+          },
+          "handling": "shareable"
+        },
+        {
+          "id": "01K4PROMPTHIDDEN4V8B2N6Q:summary:privacy",
+          "type": "checkpoint-summary",
+          "label": "Privacy boundary summary",
+          "content": "Sensitive fields were excluded from the external evidence projection.",
+          "contentHash": "5a7bc0c12687a575b571df1dac77fcb0d90d1e2b45050bcd20fc4fbabeb7d3c7",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4PROMPTHIDDEN4V8B2N6Q",
+            "locator": "summary:privacy-boundary"
+          },
+          "handling": "shareable"
+        }
+      ]
+    },
+    {
+      "checkpoint": {
+        "id": "01K4TRANSCRIPTOFF5C9D3M7",
+        "title": "Transcript export unavailable",
+        "createdAt": "2026-09-06T04:05:00.000Z",
+        "agent": "codex",
+        "branch": "ui-review",
+        "contextCompleteness": "incomplete"
+      },
+      "prompt": {
+        "availability": "available",
+        "value": "Make incomplete Checkpoint context unmistakable in the review interface."
+      },
+      "transcript": {
+        "availability": "unavailable",
+        "reason": "Transcript export is disabled for this repository."
+      },
+      "metadataPartial": false,
+      "outcome": "The review pane now labels provisional results and suppresses scores when context is incomplete.",
+      "openItems": [
+        "Verify conversation-specific decisions through an authorized local source."
+      ],
+      "friction": [
+        "Conversation history is not available for review."
+      ],
+      "evidence": [
+        {
+          "id": "01K4TRANSCRIPTOFF5C9D3M7:file:review-pane",
+          "type": "file",
+          "label": "src/client/components/ReviewPane.tsx",
+          "content": "Changed file recorded by Entire: src/client/components/ReviewPane.tsx",
+          "contentHash": "0079ca5d3d212e943d661d7b918feba2aaab37f51a79df7b6419d33f06f3cb86",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4TRANSCRIPTOFF5C9D3M7",
+            "locator": "file:src/client/components/ReviewPane.tsx"
+          },
+          "handling": "shareable"
+        },
+        {
+          "id": "01K4TRANSCRIPTOFF5C9D3M7:summary:ui",
+          "type": "checkpoint-summary",
+          "label": "Incomplete-context interface summary",
+          "content": "The review interface distinguishes incomplete context from bounded results.",
+          "contentHash": "145a4797a2df51a14e1bce9478d4b64d691b0e06797aa7efeabf06f179c516da",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4TRANSCRIPTOFF5C9D3M7",
+            "locator": "summary:incomplete-context-ui"
+          },
+          "handling": "shareable"
+        }
+      ]
     }
   ]
 }

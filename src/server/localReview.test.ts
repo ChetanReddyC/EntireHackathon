@@ -22,7 +22,7 @@ describe("sensitive Checkpoint handling", () => {
     expect(review.handoff.nextStep).toContain("authorized intent context");
   });
 
-  it("excludes raw prompt and transcript evidence from an external projection", () => {
+  it("excludes raw prompt and transcript evidence even when handling is misclassified", () => {
     const secret = "raw-sensitive-prompt-do-not-send";
     const bundle = CheckpointFixtureSchema.parse({
       label: "Privacy projection fixture",
@@ -49,7 +49,7 @@ describe("sensitive Checkpoint handling", () => {
                 checkpointId: "checkpoint-private",
                 locator: "session-summary:intent",
               },
-              handling: "local-only",
+              handling: "shareable",
             },
             {
               id: "safe-file",
