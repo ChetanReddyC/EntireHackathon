@@ -45,6 +45,8 @@ button {
 .brand,
 .repo-summary,
 .pending-state,
+.local-only,
+.context-badge,
 button {
   display: inline-flex;
   align-items: center;
@@ -198,9 +200,125 @@ h2 {
 
 .empty-timeline p,
 .review-empty > p:last-child,
-.center-state p {
+.center-state p,
+.review-centered p,
+.review-section p,
+.review-summary {
   color: #69716f;
   line-height: 1.6;
+}
+
+.source-label {
+  margin: 18px 0 0;
+  color: #68716e;
+  font-size: 12px;
+}
+
+.checkpoint-list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.checkpoint-list li {
+  position: relative;
+  padding: 0 0 14px 20px;
+}
+
+.checkpoint-list li::before {
+  position: absolute;
+  top: 24px;
+  bottom: -14px;
+  left: 38px;
+  width: 1px;
+  content: "";
+  background: #ccc8bf;
+}
+
+.checkpoint-list li:last-child::before {
+  display: none;
+}
+
+.checkpoint-button {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 100%;
+  min-height: 76px;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  gap: 14px;
+  padding: 14px;
+  color: #24302d;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+}
+
+.checkpoint-button:hover,
+.checkpoint-button.selected {
+  background: #ebe7df;
+  border-color: #d4d0c7;
+}
+
+.checkpoint-button:focus-visible {
+  outline-color: #bd9840;
+}
+
+.checkpoint-node {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  color: #fff;
+  background: #cf5d49;
+  border-radius: 50%;
+}
+
+.checkpoint-copy {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.checkpoint-title {
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.checkpoint-meta {
+  color: #6d7673;
+  font-size: 12px;
+}
+
+.context-badge {
+  align-self: start;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.context-badge.incomplete {
+  color: #8a3b2e;
+  background: #f6dfd9;
+  border-color: #e5b8ad;
+}
+
+.context-badge.complete {
+  color: #236c58;
+  background: #dce9e2;
+  border-color: #b9d2c5;
+}
+
+.context-badge.unknown {
+  color: #65551f;
+  background: #eee7cf;
+  border-color: #d9c993;
 }
 
 .pending-state {
@@ -212,11 +330,17 @@ h2 {
 }
 
 .review-pane {
-  display: grid;
   min-width: 0;
   padding: 38px;
-  place-items: center;
   background: #eeebe4;
+  overflow: auto;
+}
+
+.review-centered {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  text-align: center;
 }
 
 .review-empty {
@@ -234,6 +358,215 @@ h2 {
   background: #dce9e2;
   border: 1px solid #c6d9cf;
   border-radius: 8px;
+}
+
+.review-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #d6d1c8;
+}
+
+.review-header h2 {
+  margin-bottom: 0;
+}
+
+.context-warning {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: 10px;
+  margin: 22px 0 0;
+  padding: 14px 0;
+  color: #7d352a;
+  border-top: 1px solid #ddb2a8;
+  border-bottom: 1px solid #ddb2a8;
+}
+
+.context-warning p {
+  margin: 4px 0 0;
+  color: #704943;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.review-summary {
+  margin: 20px 0;
+}
+
+.retrieval-status {
+  display: grid;
+  gap: 3px;
+  margin: 0 0 20px;
+  padding-left: 11px;
+  color: #53605c;
+  border-left: 3px solid #5d8d78;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.retrieval-status.unavailable {
+  border-left-color: #c8873f;
+}
+
+.retrieval-status span {
+  color: #69716f;
+}
+
+.review-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  border-top: 1px solid #d6d1c8;
+  border-bottom: 1px solid #d6d1c8;
+}
+
+.review-metrics > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px 0;
+}
+
+.review-metrics > div + div {
+  padding-left: 18px;
+  border-left: 1px solid #d6d1c8;
+}
+
+.review-metrics span {
+  color: #6d7673;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.review-metrics strong {
+  font-size: 14px;
+}
+
+.local-only {
+  gap: 6px;
+  color: #236c58;
+}
+
+.review-section {
+  padding: 22px 0;
+  border-bottom: 1px solid #d6d1c8;
+}
+
+.review-section h3 {
+  margin: 0 0 12px;
+  color: #293431;
+  font-size: 13px;
+  letter-spacing: 0;
+}
+
+.plain-list,
+.evidence-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plain-list {
+  display: grid;
+  gap: 8px;
+}
+
+.plain-list li {
+  position: relative;
+  padding-left: 15px;
+  color: #5f6865;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.plain-list li::before {
+  position: absolute;
+  top: 8px;
+  left: 0;
+  width: 5px;
+  height: 5px;
+  content: "";
+  background: #cf5d49;
+  border-radius: 50%;
+}
+
+.signal-row {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.signal-status {
+  color: #8a3b2e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.signal-row p {
+  margin: 5px 0 0;
+  font-size: 13px;
+}
+
+.evidence-list {
+  display: grid;
+  gap: 11px;
+}
+
+.evidence-list li {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 9px;
+  color: #56615e;
+}
+
+.evidence-list span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+
+.evidence-list strong,
+.evidence-list small {
+  overflow-wrap: anywhere;
+}
+
+.evidence-list strong {
+  color: #293431;
+  font-size: 13px;
+}
+
+.evidence-list small {
+  color: #69716f;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.handoff-section dl {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 10px 14px;
+  margin: 0;
+}
+
+.handoff-section dt {
+  color: #68716e;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.handoff-section dd {
+  margin: 0;
+  color: #38423f;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.loading-icon {
+  margin-bottom: 12px;
+  color: #cf5d49;
+  animation: spin 0.8s linear infinite;
 }
 
 .center-state {
@@ -322,13 +655,37 @@ button:focus-visible {
     gap: 14px;
   }
 
+  .checkpoint-button {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .checkpoint-button .context-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .review-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .handoff-section dl {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .handoff-section dd {
+    margin-bottom: 9px;
+  }
+
   h1 {
     font-size: 24px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .spinner {
+  .spinner,
+  .loading-icon {
     animation: none;
   }
 }

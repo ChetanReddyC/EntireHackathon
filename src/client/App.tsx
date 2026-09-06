@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { GitBranch, RefreshCw, ShieldCheck } from "lucide-react";
 
 import type { BootstrapResponse } from "../shared/contracts";
-import { loadBootstrap } from "./api";
+import { loadBootstrap, loadReview } from "./api";
 import { DecisionTimeline } from "./components/DecisionTimeline";
+import { ReviewPane, type ReviewState } from "./components/ReviewPane";
 
 type LoadState =
   | { status: "loading" }
@@ -13,6 +14,8 @@ type LoadState =
 export default function App() {
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadAttempt, setLoadAttempt] = useState(0);
+  const [selectedCheckpointId, setSelectedCheckpointId] = useState<string>();
+  const [reviewState, setReviewState] = useState<ReviewState>({ status: "idle" });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -29,6 +32,28 @@ export default function App() {
 
     return () => controller.abort();
   }, [loadAttempt]);
+
+  useEffect(() => {
+    if (!selectedCheckpointId) {
+      setReviewState({ status: "idle" });
+      return;
+    }
+
+    const controller = new AbortController();
+    setReviewState({ status: "loading" });
+    loadReview(selectedCheckpointId, controller.signal)
+      .then((data) => setReviewState({ status: "ready", data }))
+      .catch((error: unknown) => {
+        if (!controller.signal.aborted) {
+          setReviewState({
+            status: "error",
+            message: error instanceof Error ? error.message : "Checkpoint review could not be loaded.",
+          });
+        }
+      });
+
+    return () => controller.abort();
+  }, [selectedCheckpointId]);
 
   return (
     <div className="app-shell">
@@ -67,17 +92,13 @@ export default function App() {
 
         {loadState.status === "ready" && (
           <div className="product-grid">
-            <DecisionTimeline />
-            <aside className="review-pane" aria-labelledby="review-heading">
-              <div className="review-empty">
-                <span className="review-icon" aria-hidden="true">
-                  <ShieldCheck size={22} />
-                </span>
-                <p className="eyebrow">Change review</p>
-                <h2 id="review-heading">Select a checkpoint</h2>
-                <p>Intent signals, supporting evidence, and handoff context will appear here.</p>
-              </div>
-            </aside>
+            <DecisionTimeline
+              checkpoints={loadState.data.checkpoints}
+              selectedId={selectedCheckpointId}
+              sourceLabel={loadState.data.checkpointSource.label}
+              onSelect={setSelectedCheckpointId}
+            />
+            <ReviewPane state={reviewState} />
           </div>
         )}
       </main>

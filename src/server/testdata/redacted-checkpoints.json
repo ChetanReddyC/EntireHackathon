@@ -1,0 +1,73 @@
+{
+  "label": "Redacted Checkpoint fixture",
+  "checkpoints": [
+    {
+      "checkpoint": {
+        "id": "01K4SENSITIVE8Q2M9F5X7D3",
+        "title": "Checkpoint with protected repository context",
+        "createdAt": "2026-09-06T06:10:00.000Z",
+        "agent": "codex",
+        "branch": "main",
+        "contextCompleteness": "incomplete"
+      },
+      "prompt": {
+        "availability": "redacted",
+        "reason": "Repository policy removed the raw prompt."
+      },
+      "transcript": {
+        "availability": "unavailable",
+        "reason": "Transcript export is disabled for this sensitive repository."
+      },
+      "metadataPartial": true,
+      "outcome": "Local repository detection and the Checkpoint dashboard shell were implemented.",
+      "openItems": [
+        "Verify the implementation against an authorized copy of the original requirements.",
+        "Run the focused privacy-boundary test before approval."
+      ],
+      "friction": [
+        "Intent and conversation history cannot be inspected from this fixture."
+      ],
+      "evidence": [
+        {
+          "id": "01K4SENSITIVE8Q2M9F5X7D3:file:contracts",
+          "type": "file",
+          "label": "src/shared/contracts.ts",
+          "content": "Changed file recorded by Entire: src/shared/contracts.ts",
+          "contentHash": "7b8489d2eea10bfdaf36f88ca745d5497717d912ac8b28f2b770a27b62cc4001",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4SENSITIVE8Q2M9F5X7D3",
+            "locator": "file:src/shared/contracts.ts"
+          },
+          "handling": "shareable"
+        },
+        {
+          "id": "01K4SENSITIVE8Q2M9F5X7D3:file:api",
+          "type": "file",
+          "label": "src/server/api.ts",
+          "content": "Changed file recorded by Entire: src/server/api.ts",
+          "contentHash": "43fc0b1dd4a98ace0bb4b72353894baa01c882c377b8e451883bf5be5593f4ba",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4SENSITIVE8Q2M9F5X7D3",
+            "locator": "file:src/server/api.ts"
+          },
+          "handling": "shareable"
+        },
+        {
+          "id": "01K4SENSITIVE8Q2M9F5X7D3:test:pending",
+          "type": "test",
+          "label": "Privacy boundary verification",
+          "content": "Focused verification is recorded as pending, not passed.",
+          "contentHash": "0941de6e2585c3184d804ace84755ff91dcab9651c0b05bf770d564d9b5efb91",
+          "provenance": {
+            "source": "entire-checkpoint",
+            "checkpointId": "01K4SENSITIVE8Q2M9F5X7D3",
+            "locator": "test:privacy-boundary"
+          },
+          "handling": "shareable"
+        }
+      ]
+    }
+  ]
+}
